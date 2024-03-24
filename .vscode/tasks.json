@@ -1,0 +1,30 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "run release sfm",
+            "command": "${workspaceFolder}/build/bin/Release/sfm",
+            "problemMatcher": [],
+            "dependsOn": [
+                "CMake: build Release"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "CMake: build Release",
+            "command": "cmake -S. -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "CMake build Release"
+        },
+        {
+            "type": "shell",
+            "label": "CMake: build Debug",
+            "command": "cmake -S. -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build --config Debug",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "CMake build Debug"
+        }
+    ]
+}
