@@ -1,5 +1,7 @@
-#include "camera.h"
-#include "opencvx.h"
+#include <opencv2/core/hal/interface.h>
+#include <pangolin/pangolin.h>
+#include <unistd.h>
+
 #include <Eigen/Core>
 #include <algorithm>
 #include <atomic>
@@ -9,7 +11,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/core/base.hpp>
 #include <opencv2/core/cvstd_wrapper.hpp>
-#include <opencv2/core/hal/interface.h>
+#include <opencv2/core/eigen.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/matx.hpp>
 #include <opencv2/core/operations.hpp>
@@ -19,20 +21,20 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 #include <ostream>
-#include <pangolin/pangolin.h>
 #include <string>
-#include <unistd.h>
 #include <vector>
-#include <opencv2/core/eigen.hpp>
-#include "epipolar/epipolar.h"
+
+#include "camera.h"
 #include "epipolar/draw.h"
+#include "geometry/epipolar.h"
+#include "geometry/triangulation.h"
 #include "keypoint/draw.h"
+#include "opencvx.h"
 #include "sfm.h"
-
-
+#include "visualization/camera.h"
 
 void draw();
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     std::vector<std::string> imagePaths = {
         "./resources/fountain/images/0000.png",
         "./resources/fountain/images/0001.png",
@@ -63,51 +65,75 @@ int main(int argc, char *argv[]) {
     mts::SfM sfm = {imagePaths, kPaths};
     sfm.loadData();
     std::cout << "fin" << std::endl;
+    mts::Camera cam6 = sfm.cameras_.at(6);
+    mts::Camera cam3 = sfm.cameras_.at(3);
+
     // cv::Mat st_img = cv::imread("./resources/fountain/images/0006.png");
     // cv::Mat nd_img = cv::imread("./resources/fountain/images/0003.png");
-    // cv::Ptr<cv::SiftFeatureDetector> detector =
-    //     cv::SiftFeatureDetector::create();
-    // std::vector<cv::KeyPoint> nd_kps;
-    // std::vector<cv::KeyPoint> st_kps;
-    // cv::Mat st_descriptors;
-    // cv::Mat nd_descriptors;
-    // Eigen::Matrix3f st_intrinsectMatrix =
-    //     mts::readIntrinsecMatrix("./resources/fountain/K/0006.k");
-    // Eigen::Matrix3f nd_intrinsectMatrix =
-    //     mts::readIntrinsecMatrix("./resources/fountain/K/0003.k");
+    cv::Ptr<cv::SiftFeatureDetector> detector = cv::SiftFeatureDetector::create();
+    std::vector<cv::KeyPoint> nd_kps;
+    std::vector<cv::KeyPoint> st_kps;
+    cv::Mat st_descriptors;
+    cv::Mat nd_descriptors;
+    Eigen::Matrix3f st_intrinsectMatrix =
+        mts::readIntrinsecMatrix("./resources/fountain/K/0006.k");
+    Eigen::Matrix3f nd_intrinsectMatrix =
+        mts::readIntrinsecMatrix("./resources/fountain/K/0003.k");
 
     // mts::Camera justACamera = mts::Camera("./resources/fountain/K/0000.k");
     // // std::cout << "intrinsic matrix: " << st_intrinsectMatrix << std::endl;
-    // detector->detectAndCompute(st_img, cv::Mat(), st_kps, st_descriptors);
-    // detector->detectAndCompute(nd_img, cv::Mat(), nd_kps, nd_descriptors);
-    // cv::Mat nd_output;
-    // cv::drawKeypoints(nd_img,
-    //                   st_kps,
-    //                   nd_output,
-    //                   cv::Scalar::all(-1),
-    //                   cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-    // cv::Mat st_output;
-    // cv::drawKeypoints(st_img,
-    //                   st_kps,
-    //                   st_output,
-    //                   cv::Scalar::all(-1),
-    //                   cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-    // std::vector<std::vector<cv::DMatch>> knnMatches;
-    // cv::BFMatcher matcher(cv::NORM_L2);
-    // matcher.knnMatch(st_descriptors, nd_descriptors, knnMatches, 2);
-    // std::sort(knnMatches.begin(), knnMatches.end());
-    // std::vector<cv::DMatch> goodMatches;
-    // std::vector<cv::Point2f> st_pts;
-    // std::vector<cv::Point2f> nd_pts;
-    // const float ratio_tresh = 0.5f;
-    // for (size_t i = 0; i < knnMatches.size(); i++) {
-    //     if (knnMatches[i][0].distance <
-    //         ratio_tresh * knnMatches[i][1].distance) {
-    //         st_pts.push_back(st_kps[knnMatches[i][0].queryIdx].pt);
-    //         nd_pts.push_back(nd_kps[knnMatches[i][0].trainIdx].pt);
-    //         goodMatches.push_back(knnMatches[i][0]);
-    //     }
-    // }
+    detector->detectAndCompute(cam6.image, cv::Mat(), st_kps, st_descriptors);
+    detector->detectAndCompute(cam3.image, cv::Mat(), nd_kps, nd_descriptors);
+    cv::Mat nd_output;
+    cv::drawKeypoints(cam3.image,
+                      nd_kps,
+                      nd_output,
+                      cv::Scalar::all(-1),
+                      cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    cv::Mat st_output;
+    cv::drawKeypoints(cam6.image,
+                      st_kps,
+                      st_output,
+                      cv::Scalar::all(-1),
+                      cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+
+    Eigen::Vector2f p1(0.1, 0.2);
+    Eigen::Vector2f p2(0.2, 0.2);
+    Eigen::Matrix4f view1 = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f view2 = Eigen::Matrix4f::Identity();
+
+    mts::triangulateLinearTwoView(p1, p2, view1, view2);
+    std::vector<std::vector<cv::DMatch>> knnMatches;
+    cv::BFMatcher matcher(cv::NORM_L2);
+    matcher.knnMatch(st_descriptors, nd_descriptors, knnMatches, 2);
+    std::sort(knnMatches.begin(), knnMatches.end());
+    std::vector<cv::DMatch> goodMatches;
+    std::vector<cv::Point2f> st_pts;
+    std::vector<cv::Point2f> nd_pts;
+    const float ratio_tresh = 0.5f;
+    for (size_t i = 0; i < knnMatches.size(); i++) {
+        if (knnMatches[i][0].distance < ratio_tresh * knnMatches[i][1].distance) {
+            st_pts.push_back(st_kps[knnMatches[i][0].queryIdx].pt);
+            nd_pts.push_back(nd_kps[knnMatches[i][0].trainIdx].pt);
+            goodMatches.push_back(knnMatches[i][0]);
+        }
+    }
+    cv::Mat mask;
+    auto F = cv::findFundamentalMat(st_pts, nd_pts, mask);
+    Eigen::Matrix3f eF;
+
+    cv::cv2eigen(F, eF);
+    auto eE = mts::computeEssentialMatrix(cam6.intrinsicMatrix, eF, cam3.intrinsicMatrix);
+    cv::Mat E;
+    cv::eigen2cv(eE, E);
+    std::cout << "Fundamental matrix" << std::endl << F << std::endl;
+    std::cout << "Fundamental matrix Eigen" << std::endl << eF << std::endl;
+
+    std::cout << "Essentianl matrix" << std::endl << E << std::endl;
+    std::cout << "Essentianl matrix Eigen" << std::endl << eE << std::endl;
+    cv::Mat R1, R2;
+    cv::Vec3f t;
+    cv::decomposeEssentialMat(E, R1, R2, t);
 
     // cv::Mat mask;
     // auto F = cv::findFundamentalMat(st_pts, nd_pts, mask = mask);
@@ -153,7 +179,7 @@ int main(int argc, char *argv[]) {
     // cv::imshow("img0", st_img);
     // cv::imshow("img1", nd_img);
     // cv::waitKey();
-    // draw();
+    draw();
 
     return 0;
 }
@@ -169,17 +195,24 @@ void draw() {
 
     // Create Interactive View in window
     pangolin::Handler3D handler(s_cam);
-    pangolin::View &d_cam = pangolin::CreateDisplay()
+    pangolin::View& d_cam = pangolin::CreateDisplay()
                                 .SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f / 480.0f)
                                 .SetHandler(&handler);
+
+    Eigen::Vector3f origin(0.0f, 0.0f, 0.0f);
+    Eigen::Vector3f xaxis(1.0f, 0.0f, 0.0f);
+    Eigen::Vector3f yaxis(0.0f, 1.0f, 0.0f);
+    Eigen::Vector3f zaxis(0.0f, 0.0f, 1.0f);
 
     while (!pangolin::ShouldQuit()) {
         // Clear screen and activate view to render into
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         d_cam.Activate(s_cam);
+        
 
         // Render OpenGL Cube
-        pangolin::glDrawColouredCube();
+        // pangolin::glDrawColouredCube();
+        mts::drawCameraAxes(origin, xaxis, yaxis, zaxis);
 
         // Swap frames and Process Events
         pangolin::FinishFrame();

@@ -1,5 +1,8 @@
 IndentWidth: 4
-ColumnLimit: 80
+ColumnLimit: 90
+
+BasedOnStyle: Google
 BinPackArguments: false
 BinPackParameters: false
-
+DerivePointerAlignment: false
+IncludeBlocks: Regroup

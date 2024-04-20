@@ -12,13 +12,13 @@ namespace mts {
 class SfM {
   public:
     SfM();
-    SfM(std::vector<std::pair<std::string, std::string>> &imageKPaths);
-    SfM(std::vector<std::string> &imagePaths, std::vector<std::string> &kPaths);
+    SfM(const std::vector<std::pair<std::string, std::string>> &imageKPaths);
+    SfM(const std::vector<std::string> &imagePaths, const std::vector<std::string> &kPaths);
     void loadImages();
     void loadKs();
     void loadData();
-    std::vector<std::pair<std::string, std::string>> imageKPaths;
-    std::vector<mts::Camera> cameras;
+    std::vector<std::pair<std::string, std::string>> imageKPaths_;
+    std::vector<mts::Camera> cameras_;
     
 };
 } // namespace mts

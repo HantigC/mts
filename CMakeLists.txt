@@ -19,7 +19,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 set(MOCV_SRCS_LIST
     src/camera.cpp
     src/opencvx.cpp
-    src/epipolar/epipolar.cpp
+    src/geometry/epipolar.cpp
+    src/geometry/triangulation.cpp
+    src/visualization/camera.cpp
     src/epipolar/draw.cpp
     src/keypoint/draw.cpp
     src/sfm.cpp
@@ -28,7 +30,9 @@ set(MOCV_SRCS_LIST
 set(MOCV_HEADERS_LIST
     src/camera.h
     src/opencvx.h
-    src/epipolar/epipolar.h
+    src/geometry/epipolar.h
+    src/geometry/triangulation.h
+    src/visualization/camera.h
     src/epipolar/draw.h
     src/keypoint/draw.h
     src/sfm.h
