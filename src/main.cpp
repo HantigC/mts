@@ -1,4 +1,5 @@
 #include <opencv2/core/hal/interface.h>
+#include <pangolin/gl/opengl_render_state.h>
 #include <pangolin/pangolin.h>
 #include <unistd.h>
 
@@ -152,17 +153,34 @@ int main(int argc, char* argv[]) {
     auto camModel2 = mts::CameraModel(view2_e);
     auto camModel3 = mts::CameraModel(view3_e);
     auto camModel4 = mts::CameraModel(view4_e);
-    std::shared_ptr<mts::BaseModel> camOrigin_p = std::make_shared<mts::CameraModel>(camOrigin);
-    std::shared_ptr<mts::BaseModel> camModel1_p = std::make_shared<mts::CameraModel>(camModel1);
-    std::shared_ptr<mts::BaseModel> camModel2_p = std::make_shared<mts::CameraModel>(camModel2);
-    std::shared_ptr<mts::BaseModel> camModel3_p = std::make_shared<mts::CameraModel>(camModel3);
-    std::shared_ptr<mts::BaseModel> camModel4_p = std::make_shared<mts::CameraModel>(camModel4);
+    std::shared_ptr<mts::BaseModel> camOrigin_p =
+        std::make_shared<mts::CameraModel>(camOrigin);
+    std::shared_ptr<mts::BaseModel> camModel1_p =
+        std::make_shared<mts::CameraModel>(camModel1);
+    std::shared_ptr<mts::BaseModel> camModel2_p =
+        std::make_shared<mts::CameraModel>(camModel2);
+    std::shared_ptr<mts::BaseModel> camModel3_p =
+        std::make_shared<mts::CameraModel>(camModel3);
+    std::shared_ptr<mts::BaseModel> camModel4_p =
+        std::make_shared<mts::CameraModel>(camModel4);
     std::vector<std::shared_ptr<mts::BaseModel>> models;
+
     models.push_back(camOrigin_p);
     models.push_back(camModel1_p);
     models.push_back(camModel2_p);
     models.push_back(camModel3_p);
     models.push_back(camModel4_p);
+
+    std::cout << camOrigin << std::endl;
+    std::cout << "view no 1: " << view1_e << std::endl << std::endl;
+    std::cout << "view no 2: " << view2_e << std::endl << std::endl;
+    std::cout << "view no 3: " << view3_e << std::endl << std::endl;
+    std::cout << "view no 4: " << view4_e << std::endl << std::endl;
+    std::cout << camOrigin << std::endl;
+    std::cout << "cam no 1: " << camModel1 << std::endl << std::endl;
+    std::cout << "cam no 2: " << camModel2 << std::endl << std::endl;
+    std::cout << "cam no 3: " << camModel3 << std::endl << std::endl;
+    std::cout << "cam no 4: " << camModel4 << std::endl << std::endl;
 
     // cv::Mat mask;
     // auto F = cv::findFundamentalMat(st_pts, nd_pts, mask = mask);
@@ -220,7 +238,7 @@ void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models) {
     // Define Projection and initial ModelView matrix
     pangolin::OpenGlRenderState s_cam(
         pangolin::ProjectionMatrix(640, 480, 420, 420, 320, 240, 0.2, 100),
-        pangolin::ModelViewLookAt(-2, 2, -2, 0, 0, 0, pangolin::AxisY));
+        pangolin::ModelViewLookAt(-2, 2, -2, 0, 0, 0, pangolin::AxisZ));
 
     // Create Interactive View in window
     pangolin::Handler3D handler(s_cam);
@@ -233,7 +251,7 @@ void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         d_cam.Activate(s_cam);
-        for (auto &model : models) {
+        for (auto& model : models) {
             model->draw();
         }
 

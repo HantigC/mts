@@ -1,8 +1,9 @@
-#include <Eigen/Dense>
 #include "render/model/camera.h"
 
-#include "visualization/camera.h"
+#include <Eigen/Dense>
 #include <iostream>
+
+#include "visualization/camera.h"
 
 namespace mts {
 
@@ -27,12 +28,26 @@ CameraModel::CameraModel(Eigen::Matrix4f& view) {
     this->yaxis = yaxis;
     this->zaxis = zaxis;
     Eigen::Matrix4f viewmInv = view.inverse();
-    this->position = viewmInv.block<3, 1>(0, 0);
+    this->position = viewmInv.block<3, 1>(0, 3);
 }
 
 void CameraModel::draw() {
     // std::cout << this->position;
     drawCameraAxes(this->position, this->xaxis, this->yaxis, this->zaxis);
+}
+
+std::ostream& operator<<(std::ostream& os, const CameraModel& camera) {
+    os << "CameraModel("
+       << "\nPosition(" << camera.position.x() << ", " << camera.position.y() << ", "
+       << camera.position.z() << ")"
+       << "\nxaxis(" << camera.xaxis.x() << ", " << camera.xaxis.y() << ", "
+       << camera.xaxis.z() << ")"
+       << "\nyaxis(" << camera.yaxis.x() << ", " << camera.yaxis.y() << ", "
+       << camera.yaxis.z() << ")"
+       << "\nzaxis(" << camera.zaxis.x() << ", " << camera.zaxis.y() << ", "
+       << camera.zaxis.z() << ")"
+       << ")";
+    return os;
 }
 
 }  // namespace mts

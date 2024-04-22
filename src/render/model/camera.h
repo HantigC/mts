@@ -20,6 +20,7 @@ class CameraModel : public BaseModel {
     Eigen::Vector3f xaxis;
     Eigen::Vector3f yaxis;
     Eigen::Vector3f zaxis;
+    friend std::ostream& operator<<(std::ostream& os, const CameraModel& camera);
 };
 }  // namespace mts
 

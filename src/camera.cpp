@@ -42,7 +42,7 @@ Eigen::Matrix4f Camera::viewFromRt(const Eigen::Matrix3f& R, const Eigen::Vector
     Eigen::Matrix4f view;
     view.block<3, 3>(0, 0) = R;
     view.block<3, 1>(0, 3) = t;
-    view(3,3) = 1.0f;
+    view.block<1, 4>(3,0) << 0.0f, 0.0f, 0.0f, 1.0f;
     return view;
 }
 }  // namespace mts
