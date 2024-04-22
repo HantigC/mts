@@ -7,6 +7,7 @@
 #include <atomic>
 #include <cstddef>
 #include <iostream>
+#include <memory>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/core/base.hpp>
@@ -30,10 +31,12 @@
 #include "geometry/triangulation.h"
 #include "keypoint/draw.h"
 #include "opencvx.h"
+#include "render/model/base.h"
+#include "render/model/camera.h"
 #include "sfm.h"
 #include "visualization/camera.h"
 
-void draw();
+void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models);
 int main(int argc, char* argv[]) {
     std::vector<std::string> imagePaths = {
         "./resources/fountain/images/0000.png",
@@ -132,8 +135,34 @@ int main(int argc, char* argv[]) {
     std::cout << "Essentianl matrix" << std::endl << E << std::endl;
     std::cout << "Essentianl matrix Eigen" << std::endl << eE << std::endl;
     cv::Mat R1, R2;
+    Eigen::Matrix3f R1_e, R2_e;
     cv::Vec3f t;
+    Eigen::Vector3f t_e;
     cv::decomposeEssentialMat(E, R1, R2, t);
+    cv::cv2eigen(R1, R1_e);
+    cv::cv2eigen(R2, R2_e);
+    cv::cv2eigen(t, t_e);
+    Eigen::Matrix4f view1_e = mts::Camera::viewFromRt(R1_e, t_e);
+    Eigen::Matrix4f view2_e = mts::Camera::viewFromRt(R2_e, t_e);
+    Eigen::Matrix4f view3_e = mts::Camera::viewFromRt(R1_e, -t_e);
+    Eigen::Matrix4f view4_e = mts::Camera::viewFromRt(R2_e, -t_e);
+
+    mts::CameraModel camOrigin;
+    auto camModel1 = mts::CameraModel(view1_e);
+    auto camModel2 = mts::CameraModel(view2_e);
+    auto camModel3 = mts::CameraModel(view3_e);
+    auto camModel4 = mts::CameraModel(view4_e);
+    std::shared_ptr<mts::BaseModel> camOrigin_p = std::make_shared<mts::CameraModel>(camOrigin);
+    std::shared_ptr<mts::BaseModel> camModel1_p = std::make_shared<mts::CameraModel>(camModel1);
+    std::shared_ptr<mts::BaseModel> camModel2_p = std::make_shared<mts::CameraModel>(camModel2);
+    std::shared_ptr<mts::BaseModel> camModel3_p = std::make_shared<mts::CameraModel>(camModel3);
+    std::shared_ptr<mts::BaseModel> camModel4_p = std::make_shared<mts::CameraModel>(camModel4);
+    std::vector<std::shared_ptr<mts::BaseModel>> models;
+    models.push_back(camOrigin_p);
+    models.push_back(camModel1_p);
+    models.push_back(camModel2_p);
+    models.push_back(camModel3_p);
+    models.push_back(camModel4_p);
 
     // cv::Mat mask;
     // auto F = cv::findFundamentalMat(st_pts, nd_pts, mask = mask);
@@ -179,12 +208,12 @@ int main(int argc, char* argv[]) {
     // cv::imshow("img0", st_img);
     // cv::imshow("img1", nd_img);
     // cv::waitKey();
-    draw();
+    draw(models);
 
     return 0;
 }
 
-void draw() {
+void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models) {
     pangolin::CreateWindowAndBind("Main", 640, 480);
     glEnable(GL_DEPTH_TEST);
 
@@ -199,20 +228,17 @@ void draw() {
                                 .SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f / 480.0f)
                                 .SetHandler(&handler);
 
-    Eigen::Vector3f origin(0.0f, 0.0f, 0.0f);
-    Eigen::Vector3f xaxis(1.0f, 0.0f, 0.0f);
-    Eigen::Vector3f yaxis(0.0f, 1.0f, 0.0f);
-    Eigen::Vector3f zaxis(0.0f, 0.0f, 1.0f);
-
     while (!pangolin::ShouldQuit()) {
         // Clear screen and activate view to render into
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         d_cam.Activate(s_cam);
-        
+        for (auto &model : models) {
+            model->draw();
+        }
 
         // Render OpenGL Cube
         // pangolin::glDrawColouredCube();
-        mts::drawCameraAxes(origin, xaxis, yaxis, zaxis);
 
         // Swap frames and Process Events
         pangolin::FinishFrame();

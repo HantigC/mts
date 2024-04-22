@@ -12,29 +12,44 @@ foreach(CFGNAME Debug Release)
 endforeach()
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
 
 set(MOCV_SRCS_LIST
     src/camera.cpp
     src/opencvx.cpp
+
     src/geometry/epipolar.cpp
     src/geometry/triangulation.cpp
+
     src/visualization/camera.cpp
+
+    src/render/model/base.cpp
+    src/render/model/camera.cpp
+
     src/epipolar/draw.cpp
+
     src/keypoint/draw.cpp
+
     src/sfm.cpp
 )
 
 set(MOCV_HEADERS_LIST
     src/camera.h
     src/opencvx.h
+
     src/geometry/epipolar.h
     src/geometry/triangulation.h
+
     src/visualization/camera.h
+
+    src/render/model/base.h
+    src/render/model/camera.h
+
     src/epipolar/draw.h
     src/keypoint/draw.h
+
     src/sfm.h
     )
 
