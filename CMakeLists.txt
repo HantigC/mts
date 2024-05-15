@@ -27,12 +27,15 @@ set(MOCV_SRCS_LIST
 
     src/render/model/base.cpp
     src/render/model/camera.cpp
+    src/render/model/pcl.cpp
 
     src/epipolar/draw.cpp
 
     src/keypoint/draw.cpp
 
     src/sfm.cpp
+
+    src/utils/convert/cv.cpp
 )
 
 set(MOCV_HEADERS_LIST
@@ -46,11 +49,14 @@ set(MOCV_HEADERS_LIST
 
     src/render/model/base.h
     src/render/model/camera.h
+    src/render/model/pcl.h
 
     src/epipolar/draw.h
     src/keypoint/draw.h
 
     src/sfm.h
+
+    src/utils/convert/cv.h
     )
 
 add_executable( sfm 

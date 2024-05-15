@@ -1,4 +1,5 @@
 #include "render/model/camera.h"
+#include <pangolin/gl/glfont.h>
 
 #include <Eigen/Dense>
 #include <iostream>

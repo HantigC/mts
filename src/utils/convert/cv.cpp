@@ -2,6 +2,8 @@
 
 #include <vector>
 
+namespace mts {
+
 Eigen::Vector2f cvToEigen(cv::Point2f point2f) {
     return Eigen::Vector2f(point2f.x, point2f.y);
 }
@@ -14,11 +16,4 @@ std::vector<Eigen::Vector2f> cvToEigen(std::vector<cv::Point2f> points2d) {
     return points2d_eigen;
 }
 
-
-
-template <typename Scalar, size_t Rows, size_t Cols>
-Eigen::Matrix< Scalar, Rows, Cols> cvToEigen(const cv::Mat &cvMat){
-    Eigen::Matrix<Scalar, Rows, Cols> eigenMat;
-    cvMat.rows == Rows;
-    cvMat.cols == Cols;
-}
+}  // namespace mts

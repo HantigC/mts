@@ -34,10 +34,15 @@
 #include "opencvx.h"
 #include "render/model/base.h"
 #include "render/model/camera.h"
+#include "render/model/pcl.h"
 #include "sfm.h"
+#include "utils/convert/cv.h"
 #include "visualization/camera.h"
 
-void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models);
+void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models,
+          Eigen::Vector3f& position,
+          Eigen::Vector3f& gaze);
+
 int main(int argc, char* argv[]) {
     std::vector<std::string> imagePaths = {
         "./resources/fountain/images/0000.png",
@@ -122,6 +127,8 @@ int main(int argc, char* argv[]) {
             goodMatches.push_back(knnMatches[i][0]);
         }
     }
+    std::vector<Eigen::Vector2f> st_pts_E = mts::cvToEigen(st_pts);
+    std::vector<Eigen::Vector2f> nd_pts_E = mts::cvToEigen(nd_pts);
     cv::Mat mask;
     auto F = cv::findFundamentalMat(st_pts, nd_pts, mask);
     Eigen::Matrix3f eF;
@@ -147,6 +154,17 @@ int main(int argc, char* argv[]) {
     Eigen::Matrix4f view2_e = mts::Camera::viewFromRt(R2_e, t_e);
     Eigen::Matrix4f view3_e = mts::Camera::viewFromRt(R1_e, -t_e);
     Eigen::Matrix4f view4_e = mts::Camera::viewFromRt(R2_e, -t_e);
+    auto points_3d_1 = mts::triangulateLinearTwoView(
+        st_pts_E, nd_pts_E, Eigen::Matrix4f::Identity(), view1_e);
+    auto points_3d_2 = mts::triangulateLinearTwoView(
+        st_pts_E, nd_pts_E, Eigen::Matrix4f::Identity(), view2_e);
+    auto points_3d_3 = mts::triangulateLinearTwoView(
+        st_pts_E, nd_pts_E, Eigen::Matrix4f::Identity(), view3_e);
+    auto points_3d_4 = mts::triangulateLinearTwoView(
+        st_pts_E, nd_pts_E, Eigen::Matrix4f::Identity(), view4_e);
+
+    mts::Pcl point_cloud(points_3d_2);
+    std::shared_ptr<mts::BaseModel> point_cloud_1 = std::make_shared<mts::Pcl>(point_cloud);
 
     mts::CameraModel camOrigin;
     auto camModel1 = mts::CameraModel(view1_e);
@@ -170,6 +188,7 @@ int main(int argc, char* argv[]) {
     models.push_back(camModel2_p);
     models.push_back(camModel3_p);
     models.push_back(camModel4_p);
+    models.push_back(point_cloud_1);
 
     std::cout << camOrigin << std::endl;
     std::cout << "view no 1: " << view1_e << std::endl << std::endl;
@@ -226,19 +245,30 @@ int main(int argc, char* argv[]) {
     // cv::imshow("img0", st_img);
     // cv::imshow("img1", nd_img);
     // cv::waitKey();
-    draw(models);
+    Eigen::Vector3f origin(0.0f, 0.0f, 0.0f);
+    Eigen::Vector3f forward(0.0f, 0.0f, 1.0f);
+    origin = origin - 1.0f * forward;
+    draw(models, origin, forward);
 
     return 0;
 }
 
-void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models) {
+void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models,
+          Eigen::Vector3f& position,
+          Eigen::Vector3f& gaze) {
     pangolin::CreateWindowAndBind("Main", 640, 480);
     glEnable(GL_DEPTH_TEST);
 
     // Define Projection and initial ModelView matrix
     pangolin::OpenGlRenderState s_cam(
         pangolin::ProjectionMatrix(640, 480, 420, 420, 320, 240, 0.2, 100),
-        pangolin::ModelViewLookAt(-2, 2, -2, 0, 0, 0, pangolin::AxisZ));
+        pangolin::ModelViewLookAt(position.x(),
+                                  position.y(),
+                                  position.z(),
+                                  gaze.x(),
+                                  gaze.y(),
+                                  gaze.z(),
+                                  pangolin::AxisNegY));
 
     // Create Interactive View in window
     pangolin::Handler3D handler(s_cam);
