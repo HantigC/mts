@@ -38,6 +38,7 @@
 #include "sfm.h"
 #include "utils/convert/cv.h"
 #include "visualization/camera.h"
+#include "utils/extend/cv/image.h"
 
 void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models,
           Eigen::Vector3f& position,
@@ -129,6 +130,10 @@ int main(int argc, char* argv[]) {
     }
     std::vector<Eigen::Vector2f> st_pts_E = mts::cvToEigen(st_pts);
     std::vector<Eigen::Vector2f> nd_pts_E = mts::cvToEigen(nd_pts);
+    auto st_rgbs =  mts::getRGBAt(cam6.image, st_pts_E);
+    auto nd_rgbs =  mts::getRGBAt(cam6.image, st_pts_E);
+    auto st_rgbs_e = mts::cvToEigen(st_rgbs);
+    auto nd_rgbs_e = mts::cvToEigen(nd_rgbs);
     cv::Mat mask;
     auto F = cv::findFundamentalMat(st_pts, nd_pts, mask);
     Eigen::Matrix3f eF;
@@ -163,7 +168,7 @@ int main(int argc, char* argv[]) {
     auto points_3d_4 = mts::triangulateLinearTwoView(
         st_pts_E, nd_pts_E, Eigen::Matrix4f::Identity(), view4_e);
 
-    mts::Pcl point_cloud(points_3d_2);
+    mts::Pcl point_cloud(points_3d_4, st_rgbs_e);
     std::shared_ptr<mts::BaseModel> point_cloud_1 = std::make_shared<mts::Pcl>(point_cloud);
 
     mts::CameraModel camOrigin;
@@ -184,9 +189,9 @@ int main(int argc, char* argv[]) {
     std::vector<std::shared_ptr<mts::BaseModel>> models;
 
     models.push_back(camOrigin_p);
-    models.push_back(camModel1_p);
-    models.push_back(camModel2_p);
-    models.push_back(camModel3_p);
+    // models.push_back(camModel1_p);
+    // models.push_back(camModel2_p);
+    // models.push_back(camModel3_p);
     models.push_back(camModel4_p);
     models.push_back(point_cloud_1);
 

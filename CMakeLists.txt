@@ -36,6 +36,7 @@ set(MOCV_SRCS_LIST
     src/sfm.cpp
 
     src/utils/convert/cv.cpp
+    src/utils/extend/cv/image.cpp
 )
 
 set(MOCV_HEADERS_LIST
@@ -57,6 +58,8 @@ set(MOCV_HEADERS_LIST
     src/sfm.h
 
     src/utils/convert/cv.h
+    src/utils/extend/cv/image.h
+
     )
 
 add_executable( sfm 
