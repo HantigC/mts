@@ -8,7 +8,7 @@
             "type": "lldb",
             "request": "launch",
             "name": "Debug",
-            "program": "${workspaceFolder}/build/bin/Debug/sfm",
+            "program": "${workspaceFolder}/build/bin/Debug/mts",
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "CMake: build Debug"

@@ -3,8 +3,8 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "run release sfm",
-            "command": "${workspaceFolder}/build/bin/Release/sfm",
+            "label": "run release mts",
+            "command": "${workspaceFolder}/build/bin/Release/mts",
             "problemMatcher": [],
             "dependsOn": [
                 "CMake: build Release"

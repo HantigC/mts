@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(mocv LANGUAGES CXX C)
+project(mts LANGUAGES CXX C)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -62,7 +62,7 @@ set(MOCV_HEADERS_LIST
 
     )
 
-add_executable( sfm 
+add_executable( mts 
     src/main.cpp
     ${MOCV_SRCS_LIST}
     ${MOCV_HEADERS_LIST}
@@ -71,10 +71,15 @@ add_executable( sfm
 
 find_package(OpenCV REQUIRED)
 find_package(Pangolin REQUIRED)
-target_include_directories(sfm PRIVATE include)
-target_include_directories(sfm PRIVATE src)
-target_include_directories(sfm PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_include_directories(sfm PRIVATE "/usr/include/eigen3" )
-target_include_directories(sfm PRIVATE ${Pangolin_INCLUDE_DIRS})
-target_link_libraries(sfm ${OpenCV_LIBS})
-target_link_libraries(sfm ${Pangolin_LIBRARIES})
+#find_package(Ceres REQUIRED)
+
+
+target_include_directories(mts PRIVATE include)
+target_include_directories(mts PRIVATE src)
+target_include_directories(mts PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_include_directories(mts PRIVATE "/usr/include/eigen3" )
+target_include_directories(mts PRIVATE ${Pangolin_INCLUDE_DIRS})
+#target_include_directories(mts PRIVATE ${CERES_INCLUDE_DIRS})
+#target_link_libraries(mts ${CERES_LIBRARIES})
+target_link_libraries(mts ${OpenCV_LIBS})
+target_link_libraries(mts ${Pangolin_LIBRARIES})
