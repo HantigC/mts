@@ -1,4 +1,3 @@
-#include <opencv2/core/hal/interface.h>
 #include <pangolin/gl/opengl_render_state.h>
 #include <pangolin/pangolin.h>
 #include <unistd.h>
@@ -9,18 +8,8 @@
 #include <cstddef>
 #include <iostream>
 #include <memory>
-#include <opencv2/calib3d.hpp>
-#include <opencv2/core.hpp>
 #include <opencv2/core/base.hpp>
-#include <opencv2/core/cvstd_wrapper.hpp>
 #include <opencv2/core/eigen.hpp>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/core/matx.hpp>
-#include <opencv2/core/operations.hpp>
-#include <opencv2/core/types.hpp>
-#include <opencv2/features2d.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 #include <ostream>
 #include <string>
@@ -37,8 +26,8 @@
 #include "render/model/pcl.h"
 #include "sfm.h"
 #include "utils/convert/cv.h"
-#include "visualization/camera.h"
 #include "utils/extend/cv/image.h"
+#include "visualization/camera.h"
 
 void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models,
           Eigen::Vector3f& position,
@@ -75,8 +64,8 @@ int main(int argc, char* argv[]) {
     mts::SfM sfm = {imagePaths, kPaths};
     sfm.loadData();
     std::cout << "fin" << std::endl;
-    mts::Camera cam6 = sfm.cameras_.at(6);
-    mts::Camera cam3 = sfm.cameras_.at(3);
+    mts::Camera cam6 = sfm.cameras_.at(4);
+    mts::Camera cam3 = sfm.cameras_.at(5);
 
     // cv::Mat st_img = cv::imread("./resources/fountain/images/0006.png");
     // cv::Mat nd_img = cv::imread("./resources/fountain/images/0003.png");
@@ -112,7 +101,6 @@ int main(int argc, char* argv[]) {
     Eigen::Matrix4f view1 = Eigen::Matrix4f::Identity();
     Eigen::Matrix4f view2 = Eigen::Matrix4f::Identity();
 
-    mts::triangulateLinearTwoView(p1, p2, view1, view2);
     std::vector<std::vector<cv::DMatch>> knnMatches;
     cv::BFMatcher matcher(cv::NORM_L2);
     matcher.knnMatch(st_descriptors, nd_descriptors, knnMatches, 2);
@@ -130,8 +118,13 @@ int main(int argc, char* argv[]) {
     }
     std::vector<Eigen::Vector2f> st_pts_E = mts::cvToEigen(st_pts);
     std::vector<Eigen::Vector2f> nd_pts_E = mts::cvToEigen(nd_pts);
-    auto st_rgbs =  mts::getRGBAt(cam6.image, st_pts_E);
-    auto nd_rgbs =  mts::getRGBAt(cam6.image, st_pts_E);
+
+    auto stCameraPts = cam6.fromImageToCamera(st_pts_E);
+    auto ndCameraPts = cam6.fromImageToCamera(nd_pts_E);
+
+    auto st_rgbs = mts::getRGBAt(cam6.image, st_pts_E);
+    auto nd_rgbs = mts::getRGBAt(cam6.image, st_pts_E);
+
     auto st_rgbs_e = mts::cvToEigen(st_rgbs);
     auto nd_rgbs_e = mts::cvToEigen(nd_rgbs);
     cv::Mat mask;
@@ -139,7 +132,7 @@ int main(int argc, char* argv[]) {
     Eigen::Matrix3f eF;
 
     cv::cv2eigen(F, eF);
-    auto eE = mts::computeEssentialMatrix(cam6.intrinsicMatrix, eF, cam3.intrinsicMatrix);
+    auto eE = mts::computeEssentialMatrix(cam6.K, eF, cam3.K);
     cv::Mat E;
     cv::eigen2cv(eE, E);
     std::cout << "Fundamental matrix" << std::endl << F << std::endl;
@@ -159,17 +152,30 @@ int main(int argc, char* argv[]) {
     Eigen::Matrix4f view2_e = mts::Camera::viewFromRt(R2_e, t_e);
     Eigen::Matrix4f view3_e = mts::Camera::viewFromRt(R1_e, -t_e);
     Eigen::Matrix4f view4_e = mts::Camera::viewFromRt(R2_e, -t_e);
-    auto points_3d_1 = mts::triangulateLinearTwoView(
-        st_pts_E, nd_pts_E, Eigen::Matrix4f::Identity(), view1_e);
-    auto points_3d_2 = mts::triangulateLinearTwoView(
-        st_pts_E, nd_pts_E, Eigen::Matrix4f::Identity(), view2_e);
-    auto points_3d_3 = mts::triangulateLinearTwoView(
-        st_pts_E, nd_pts_E, Eigen::Matrix4f::Identity(), view3_e);
-    auto points_3d_4 = mts::triangulateLinearTwoView(
-        st_pts_E, nd_pts_E, Eigen::Matrix4f::Identity(), view4_e);
+    std::vector<Eigen::Vector3f> points_3d_1 = mts::triangulateLinearTwoView<3>(
+        stCameraPts, ndCameraPts, Eigen::Matrix4f::Identity(), view1_e);
+    std::vector<Eigen::Vector3f> points_3d_2 = mts::triangulateLinearTwoView<3>(
+        stCameraPts, ndCameraPts, Eigen::Matrix4f::Identity(), view2_e);
+    std::vector<Eigen::Vector3f> points_3d_3 = mts::triangulateLinearTwoView<3>(
+        stCameraPts, ndCameraPts, Eigen::Matrix4f::Identity(), view3_e);
+    std::vector<Eigen::Vector3f> points_3d_4 = mts::triangulateLinearTwoView<3>(
+        stCameraPts, ndCameraPts, Eigen::Matrix4f::Identity(), view4_e);
 
-    mts::Pcl point_cloud(points_3d_4, st_rgbs_e);
-    std::shared_ptr<mts::BaseModel> point_cloud_1 = std::make_shared<mts::Pcl>(point_cloud);
+    mts::Pcl point_cloud1(points_3d_1, st_rgbs_e);
+    mts::Pcl point_cloud2(points_3d_2, st_rgbs_e);
+    mts::Pcl point_cloud3(points_3d_3, st_rgbs_e);
+    mts::Pcl point_cloud4(points_3d_4, st_rgbs_e);
+    std::shared_ptr<mts::BaseModel> point_cloud1_p =
+        std::make_shared<mts::Pcl>(point_cloud1);
+
+    std::shared_ptr<mts::BaseModel> point_cloud2_p =
+        std::make_shared<mts::Pcl>(point_cloud2);
+
+    std::shared_ptr<mts::BaseModel> point_cloud3_p =
+        std::make_shared<mts::Pcl>(point_cloud3);
+
+    std::shared_ptr<mts::BaseModel> point_cloud4_p =
+        std::make_shared<mts::Pcl>(point_cloud4);
 
     mts::CameraModel camOrigin;
     auto camModel1 = mts::CameraModel(view1_e);
@@ -189,11 +195,18 @@ int main(int argc, char* argv[]) {
     std::vector<std::shared_ptr<mts::BaseModel>> models;
 
     models.push_back(camOrigin_p);
-    // models.push_back(camModel1_p);
+
+    models.push_back(camModel1_p);
+    models.push_back(point_cloud1_p);
+
     // models.push_back(camModel2_p);
+    // models.push_back(point_cloud2_p);
+
     // models.push_back(camModel3_p);
-    models.push_back(camModel4_p);
-    models.push_back(point_cloud_1);
+    // models.push_back(point_cloud3_p);
+
+    // models.push_back(camModel4_p);
+    // models.push_back(point_cloud4_p);
 
     std::cout << camOrigin << std::endl;
     std::cout << "view no 1: " << view1_e << std::endl << std::endl;

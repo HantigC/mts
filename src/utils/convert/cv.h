@@ -2,8 +2,6 @@
 #define UTILS_CONVERT_CV_H
 #include <Eigen/Core>
 #include <cstddef>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/core/matx.hpp>
 #include <opencv2/opencv.hpp>
 #include <vector>
 namespace mts {

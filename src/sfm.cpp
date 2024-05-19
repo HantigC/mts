@@ -39,7 +39,7 @@ void SfM::loadKs() {
     int i = 0;
     bool areadyLoaded;
     for (auto& imageK : this->imageKPaths_) {
-        this->cameras_[i].intrinsicMatrix = mts::readIntrinsecMatrix(imageK.second);
+        this->cameras_[i].K = mts::readIntrinsecMatrix(imageK.second);
         i++;
     }
 }

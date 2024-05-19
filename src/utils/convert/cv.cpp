@@ -1,6 +1,6 @@
 #include "utils/convert/cv.h"
 
-#include <opencv2/core/matx.hpp>
+#include <opencv2/opencv.hpp>
 #include <vector>
 
 namespace mts {
@@ -16,7 +16,8 @@ Eigen::Vector3f cvToEigen(cv::Vec3b vec) {
 }
 
 std::vector<Eigen::Vector3f> cvToEigen(std::vector<cv::Vec3b> &pts) {
-    std::vector<Eigen::Vector3f> pts_eigen(pts.size());
+    std::vector<Eigen::Vector3f> pts_eigen;
+    pts_eigen.reserve(pts.size());
     for (auto pt : pts) {
         pts_eigen.push_back(cvToEigen(pt));
     }
@@ -24,7 +25,8 @@ std::vector<Eigen::Vector3f> cvToEigen(std::vector<cv::Vec3b> &pts) {
 }
 
 std::vector<Eigen::Vector2f> cvToEigen(std::vector<cv::Point2f> &points2d) {
-    std::vector<Eigen::Vector2f> points2d_eigen(points2d.size());
+    std::vector<Eigen::Vector2f> points2d_eigen;
+    points2d_eigen.reserve(points2d.size());
     for (auto point2d : points2d) {
         points2d_eigen.push_back(cvToEigen(point2d));
     }
