@@ -18,6 +18,7 @@
 #include "camera.h"
 #include "epipolar/draw.h"
 #include "geometry/epipolar.h"
+#include "geometry/pose.h"
 #include "geometry/triangulation.h"
 #include "keypoint/draw.h"
 #include "opencvx.h"
@@ -148,10 +149,21 @@ int main(int argc, char* argv[]) {
     cv::cv2eigen(R1, R1_e);
     cv::cv2eigen(R2, R2_e);
     cv::cv2eigen(t, t_e);
+    Eigen::Vector3f negT_e = -t_e;
     Eigen::Matrix4f view1_e = mts::Camera::viewFromRt(R1_e, t_e);
     Eigen::Matrix4f view2_e = mts::Camera::viewFromRt(R2_e, t_e);
     Eigen::Matrix4f view3_e = mts::Camera::viewFromRt(R1_e, -t_e);
     Eigen::Matrix4f view4_e = mts::Camera::viewFromRt(R2_e, -t_e);
+    std::vector<Eigen::Vector3f> points3D;
+    points3D.reserve(stCameraPts.size());
+    mts::checkCheirality<3>(R1_e, t_e, stCameraPts, ndCameraPts, points3D);
+    std::cout << "amouth R1, t: "  << points3D.size() << std::endl;
+    mts::checkCheirality<3>(R2_e, t_e, stCameraPts, ndCameraPts, points3D);
+    std::cout << "amouth R2, t: "  << points3D.size() << std::endl;
+    mts::checkCheirality<3>(R1_e, negT_e, stCameraPts, ndCameraPts, points3D);
+    std::cout << "amouth R1, -t: "  << points3D.size() << std::endl;
+    mts::checkCheirality<3>(R2_e, negT_e, stCameraPts, ndCameraPts, points3D);
+    std::cout << "amouth R1, -t: "  << points3D.size() << std::endl;
     std::vector<Eigen::Vector3f> points_3d_1 = mts::triangulateLinearTwoView<3>(
         stCameraPts, ndCameraPts, Eigen::Matrix4f::Identity(), view1_e);
     std::vector<Eigen::Vector3f> points_3d_2 = mts::triangulateLinearTwoView<3>(

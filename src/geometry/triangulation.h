@@ -3,17 +3,13 @@
 #include <Eigen/Eigen>
 #include <cstddef>
 #include <vector>
+
+#include "camera.h"
 namespace mts {
 Eigen::Vector3f triangulateMidPoint(const Eigen::Vector2f& st_point,
                                     const Eigen::Vector2f& nd_point,
                                     const Eigen::Matrix4f& st_view,
                                     const Eigen::Matrix4f& nd_view);
-
-template <int T>
-Eigen::Vector3f triangulateLinearTwoView(const Eigen::Vector<float, T> st_point,
-                                         const Eigen::Vector<float, T> nd_point,
-                                         const Eigen::Matrix4f& st_view,
-                                         const Eigen::Matrix4f& nd_view);
 
 template <int T>
 Eigen::Vector3f triangulateLinearTwoView(const Eigen::Vector<float, T> st_point,
@@ -33,11 +29,37 @@ Eigen::Vector3f triangulateLinearTwoView(const Eigen::Vector<float, T> st_point,
 }
 
 template <int T>
-std::vector<Eigen::Vector3f> triangulateLinearTwoView(
-    const std::vector<Eigen::Vector<float, T>>& st_points,
-    const std::vector<Eigen::Vector<float, T>>& nd_points,
-    const Eigen::Matrix4f& st_view,
-    const Eigen::Matrix4f& nd_view);
+Eigen::Vector3f triangulateLinearTwoView(const Eigen::Vector<float, T> st_point,
+                                         const Eigen::Vector<float, T> nd_point,
+                                         const Eigen::Matrix3f& stR,
+                                         const Eigen::Vector3f& stT,
+                                         const Eigen::Matrix3f& ndR,
+                                         const Eigen::Vector3f& ndT) {
+    auto stView = mts::Camera::viewFromRt(stR, stT);
+    auto ndView = mts::Camera::viewFromRt(ndR, ndT);
+    auto point3d = mts::triangulateLinearTwoView(st_point, nd_point, stView, ndView);
+    return point3d;
+}
+
+template <int T>
+Eigen::Vector3f triangulateLinearTwoView(const Eigen::Vector<float, T> st_point,
+                                         const Eigen::Vector<float, T> nd_point,
+                                         const Eigen::Matrix4f& view) {
+    Eigen::Matrix4f eye = Eigen::Matrix4f::Identity();
+    auto point3d = mts::triangulateLinearTwoView<T>(st_point, nd_point, eye, view);
+    return point3d;
+}
+
+template <int T>
+Eigen::Vector3f triangulateLinearTwoView(const Eigen::Vector<float, T> st_point,
+                                         const Eigen::Vector<float, T> nd_point,
+                                         const Eigen::Matrix3f& R,
+                                         const Eigen::Vector3f& t) {
+    Eigen::Matrix4f eye = Eigen::Matrix4f::Identity();
+    auto view = mts::Camera::viewFromRt(R, t);
+    auto point3d = mts::triangulateLinearTwoView<T>(st_point, nd_point, eye, view);
+    return point3d;
+}
 
 template <int T>
 std::vector<Eigen::Vector3f> triangulateLinearTwoView(
@@ -52,6 +74,39 @@ std::vector<Eigen::Vector3f> triangulateLinearTwoView(
             st_points.at(i), nd_points.at(i), st_view, nd_view));
     }
     return points_3d;
+}
+template <int T>
+std::vector<Eigen::Vector3f> triangulateLinearTwoView(
+    const std::vector<Eigen::Vector<float, T>>& st_points,
+    const std::vector<Eigen::Vector<float, T>>& nd_points,
+    const Eigen::Matrix4f& view) {
+    auto eye = Eigen::Matrix4f::Identity();
+    auto points3D = mts::triangulateLinearTwoView(st_points, nd_points, eye, view);
+    return points3D;
+}
+
+template <int T>
+std::vector<Eigen::Vector3f> triangulateLinearTwoView(
+    const std::vector<Eigen::Vector<float, T>>& st_points,
+    const std::vector<Eigen::Vector<float, T>>& nd_points,
+    const Eigen::Matrix3f& stR,
+    const Eigen::Vector3f& stT,
+    const Eigen::Matrix3f& ndR,
+    const Eigen::Vector3f& ndT) {
+    auto stView = mts::Camera::viewFromRt(stR, stT);
+    auto ndView = mts::Camera::viewFromRt(ndR, ndT);
+    return mts::triangulateLinearTwoView(st_points, nd_points, stView, ndView);
+}
+
+template <int T>
+std::vector<Eigen::Vector3f> triangulateLinearTwoView(
+    const std::vector<Eigen::Vector<float, T>>& st_points,
+    const std::vector<Eigen::Vector<float, T>>& nd_points,
+    const Eigen::Matrix3f& R,
+    const Eigen::Vector3f& t) {
+    auto stView = Eigen::Matrix4f::Identity();
+    auto ndView = mts::Camera::viewFromRt(R, t);
+    return mts::triangulateLinearTwoView(st_points, nd_points, stView, ndView);
 }
 
 Eigen::Vector3f triangulateLinearMultiView(

@@ -22,6 +22,7 @@ set(MOCV_SRCS_LIST
 
     src/geometry/epipolar.cpp
     src/geometry/triangulation.cpp
+    src/geometry/pose.cpp
 
     src/visualization/camera.cpp
 
@@ -45,6 +46,7 @@ set(MOCV_HEADERS_LIST
 
     src/geometry/epipolar.h
     src/geometry/triangulation.h
+    src/geometry/pose.h
 
     src/visualization/camera.h
 

@@ -1,4 +1,5 @@
 #include "render/model/camera.h"
+
 #include <pangolin/gl/glfont.h>
 
 #include <Eigen/Dense>
@@ -18,8 +19,17 @@ CameraModel::CameraModel() {
 CameraModel::CameraModel(Eigen::Vector3f& position,
                          Eigen::Vector3f& xaxis,
                          Eigen::Vector3f& yaxis,
-                         Eigen::Vector3f& zaxis)
-    : position(position), xaxis(xaxis), yaxis(yaxis), zaxis(zaxis) {}
+                         Eigen::Vector3f& zaxis,
+                         Eigen::Matrix3f& K,
+                         size_t width,
+                         size_t height)
+    : position(position),
+      xaxis(xaxis),
+      yaxis(yaxis),
+      zaxis(zaxis),
+      K(K),
+      width(width),
+      height(height) {}
 
 CameraModel::CameraModel(Eigen::Matrix4f& view) {
     Eigen::Vector3f xaxis = view.block<1, 3>(0, 0);
