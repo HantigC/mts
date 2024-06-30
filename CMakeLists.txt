@@ -25,6 +25,9 @@ set(MOCV_SRCS_LIST
     src/geometry/pose.cpp
     src/geometry/rigid3d.cpp
 
+    src/geometry/fundamental.cpp
+    src/geometry/essential.cpp
+
     src/visualization/camera.cpp
 
     src/render/model/base.cpp
@@ -39,7 +42,9 @@ set(MOCV_SRCS_LIST
 
     src/keypoint/sift.cpp
 
-    #src/sfm/sfm.cpp
+    src/match/bf.cpp
+
+    src/sfm/sfm.cpp
 
     src/util/convert/cv.cpp
     src/util/extend/cv/image.cpp
@@ -50,6 +55,8 @@ set(MOCV_HEADERS_LIST
     src/data/inmemory_ds.h
 
     src/geometry/epipolar.h
+    src/geometry/fundamental.h
+    src/geometry/essential.h
     src/geometry/triangulation.h
     src/geometry/pose.h
     src/geometry/rigid3d.h
@@ -69,8 +76,11 @@ set(MOCV_HEADERS_LIST
 
     src/keypoint/sift.h
     src/keypoint/keypoint.h
+    src/match/match.h
+    src/match/bf.h
 
-    # src/sfm/sfm.h
+    src/sfm/sfm.h
+    src/util/types.h
 
     src/util/convert/cv.h
     src/util/extend/cv/image.h
