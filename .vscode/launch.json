@@ -5,13 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(lldb) Launch",
             "type": "lldb",
             "request": "launch",
-            "name": "Debug",
-            "program": "${workspaceFolder}/build/bin/Debug/mts",
+            // Resolved by CMake Tools:
+            "program": "${command:cmake.launchTargetPath}",
             "args": [],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "CMake: build Debug"
         },
     ]
 }

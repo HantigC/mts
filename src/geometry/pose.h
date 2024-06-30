@@ -3,6 +3,7 @@
 #include <Eigen/Eigen>
 #include <vector>
 
+#include "geometry/rigid3d.h"
 #include "geometry/triangulation.h"
 
 namespace mts {
@@ -65,7 +66,7 @@ bool checkCheirality(Eigen::Matrix3f& R,
                      std::vector<Eigen::Vector3f>& points3D) {
     Eigen::Vector3f point3D;
     Eigen::Matrix4f eye = Eigen::Matrix4f::Identity();
-    auto view = mts::Camera::viewFromRt(R, t);
+    auto view = mts::Rigid3D::viewFromRt(R, t);
     float stDepth, ndDepth;
     for (size_t i = 0; i < stPoints.size(); ++i) {
         point3D =

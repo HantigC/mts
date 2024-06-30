@@ -4,7 +4,7 @@
         {
             "type": "shell",
             "label": "run release mts",
-            "command": "${workspaceFolder}/build/bin/Release/mts",
+            "command": "${command:cmake.launchTargetPath}",
             "problemMatcher": [],
             "dependsOn": [
                 "CMake: build Release"

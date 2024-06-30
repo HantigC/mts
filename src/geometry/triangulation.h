@@ -1,10 +1,11 @@
-#ifndef TRIANGULATION_H
-#define TRIANGULATION_H
+#ifndef GEOMETRY_TRIANGULATION_H
+#define GEOMETRY_TRIANGULATION_H
 #include <Eigen/Eigen>
 #include <cstddef>
 #include <vector>
 
-#include "camera.h"
+#include "geometry/rigid3d.h"
+
 namespace mts {
 Eigen::Vector3f triangulateMidPoint(const Eigen::Vector2f& st_point,
                                     const Eigen::Vector2f& nd_point,
@@ -35,8 +36,8 @@ Eigen::Vector3f triangulateLinearTwoView(const Eigen::Vector<float, T> st_point,
                                          const Eigen::Vector3f& stT,
                                          const Eigen::Matrix3f& ndR,
                                          const Eigen::Vector3f& ndT) {
-    auto stView = mts::Camera::viewFromRt(stR, stT);
-    auto ndView = mts::Camera::viewFromRt(ndR, ndT);
+    auto stView = mts::Rigid3D::viewFromRt(stR, stT);
+    auto ndView = mts::Rigid3D::viewFromRt(ndR, ndT);
     auto point3d = mts::triangulateLinearTwoView(st_point, nd_point, stView, ndView);
     return point3d;
 }
@@ -56,7 +57,7 @@ Eigen::Vector3f triangulateLinearTwoView(const Eigen::Vector<float, T> st_point,
                                          const Eigen::Matrix3f& R,
                                          const Eigen::Vector3f& t) {
     Eigen::Matrix4f eye = Eigen::Matrix4f::Identity();
-    auto view = mts::Camera::viewFromRt(R, t);
+    auto view = mts::Rigid3D::viewFromRt(R, t);
     auto point3d = mts::triangulateLinearTwoView<T>(st_point, nd_point, eye, view);
     return point3d;
 }
@@ -93,8 +94,8 @@ std::vector<Eigen::Vector3f> triangulateLinearTwoView(
     const Eigen::Vector3f& stT,
     const Eigen::Matrix3f& ndR,
     const Eigen::Vector3f& ndT) {
-    auto stView = mts::Camera::viewFromRt(stR, stT);
-    auto ndView = mts::Camera::viewFromRt(ndR, ndT);
+    auto stView = mts::Rigid3D::viewFromRt(stR, stT);
+    auto ndView = mts::Rigid3D::viewFromRt(ndR, ndT);
     return mts::triangulateLinearTwoView(st_points, nd_points, stView, ndView);
 }
 
@@ -105,7 +106,7 @@ std::vector<Eigen::Vector3f> triangulateLinearTwoView(
     const Eigen::Matrix3f& R,
     const Eigen::Vector3f& t) {
     auto stView = Eigen::Matrix4f::Identity();
-    auto ndView = mts::Camera::viewFromRt(R, t);
+    auto ndView = mts::Rigid3D::viewFromRt(R, t);
     return mts::triangulateLinearTwoView(st_points, nd_points, stView, ndView);
 }
 
@@ -115,4 +116,4 @@ Eigen::Vector3f triangulateLinearMultiView(
 
 }  // namespace mts
 
-#endif  // !TRIANGULATION_H
+#endif  // !GEOMETRY_TRIANGULATION_H

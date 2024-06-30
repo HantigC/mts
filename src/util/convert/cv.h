@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <opencv2/opencv.hpp>
 #include <vector>
+
 namespace mts {
 
 Eigen::Vector2f cvToEigen(cv::Point2f);

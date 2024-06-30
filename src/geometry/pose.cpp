@@ -2,7 +2,6 @@
 
 #include <cstddef>
 
-#include "camera.h"
 #include "geometry/triangulation.h"
 
 namespace mts {
