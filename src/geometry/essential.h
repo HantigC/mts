@@ -1,5 +1,6 @@
-#ifndef EPIPOLAR_H
-#define EPIPOLAR_H
+#ifndef GEOMETRY_ESSENTIAL_H
+#define GEOMETRY_ESSENTIAL_H
+
 #include <Eigen/Core>
 #include <opencv2/opencv.hpp>
 #include <vector>
@@ -15,15 +16,9 @@ cv::Mat computeEssentialMatrix(cv::Mat& st_intrinsectMatrix,
                                cv::Mat& nd_intrinsectMatrix);
 
 void decomposeEssentialRt(Eigen::Matrix3f& essentialMatrix,
-                                  Eigen::Matrix3f& rotationMatrix1,
-                                  Eigen::Matrix3f& rotationMatrix2,
-                                  Eigen::Vector3f& translation);
-
-Eigen::Matrix3f computeFundamentalMatrix(Eigen::MatrixX2f& points1,
-                                         Eigen::MatrixX2f& points2);
-
-Eigen::Matrix3f computeFundamentalMatrix(std::vector<Eigen::Vector2f>& points1,
-                                         std::vector<Eigen::Vector2f>& points2);
+                          Eigen::Matrix3f& rotationMatrix1,
+                          Eigen::Matrix3f& rotationMatrix2,
+                          Eigen::Vector3f& translation);
 
 }  // namespace mts
-#endif  // !EPIPOLAR_H
+#endif  // !GEOMETRY_ESSENTIAL_H

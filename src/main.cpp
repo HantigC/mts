@@ -15,7 +15,6 @@
 #include <string>
 #include <vector>
 
-#include "camera.h"
 #include "epipolar/draw.h"
 #include "geometry/epipolar.h"
 #include "geometry/pose.h"
@@ -25,9 +24,9 @@
 #include "render/model/base.h"
 #include "render/model/camera.h"
 #include "render/model/pcl.h"
-#include "sfm.h"
-#include "utils/convert/cv.h"
-#include "utils/extend/cv/image.h"
+#include "sfm/sfm.h"
+#include "util/convert/cv.h"
+#include "util/extend/cv/image.h"
 #include "visualization/camera.h"
 
 void draw(const std::vector<std::shared_ptr<mts::BaseModel>>& models,
