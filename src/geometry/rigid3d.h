@@ -6,17 +6,19 @@ namespace mts {
 
 class Rigid3D {
    public:
-    Rigid3D(): R(Eigen::Matrix3f::Identity()), t() {
+    Rigid3D() : R(Eigen::Matrix3f::Identity()), t({0.0f, 0.0f, 0.0f}) {
         view = Rigid3D::viewFromRt(R, t);
     }
     Rigid3D(const Eigen::Matrix3f& R, const Eigen::Vector3f& t) : R(R), t(t) {
         view = Rigid3D::viewFromRt(R, t);
     }
 
+    Eigen::Vector3f invT();
+
     Eigen::Matrix3f R;
     Eigen::Vector3f t;
     Eigen::Matrix4f view;
-    static Eigen::Matrix4f viewFromRt(const Eigen::Matrix3f &R, const Eigen::Vector3f &t);
+    static Eigen::Matrix4f viewFromRt(const Eigen::Matrix3f& R, const Eigen::Vector3f& t);
 };
 
 }  // namespace mts

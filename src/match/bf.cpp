@@ -25,8 +25,8 @@ void BFMatcher::match(Descriptors& stDescriptors,
     }
     matches = Matches(goodMatches.size(), 2);
     for (size_t i = 0; i < goodMatches.size(); i++) {
-        matches(0, 0) = goodMatches.at(i).queryIdx;
-        matches(0, 1) = goodMatches.at(i).trainIdx;
+        matches(i, 0) = goodMatches.at(i).queryIdx;
+        matches(i, 1) = goodMatches.at(i).trainIdx;
     }
 }
 }  // namespace mts

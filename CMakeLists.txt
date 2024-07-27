@@ -48,6 +48,13 @@ set(MOCV_SRCS_LIST
 
     src/util/convert/cv.cpp
     src/util/extend/cv/image.cpp
+
+    src/render/base.cpp
+    src/render/primitive/point.cpp
+    src/render/model/scene.cpp
+
+    src/render/model/rigid3d.cpp
+
 )
 
 set(MOCV_HEADERS_LIST
@@ -84,6 +91,11 @@ set(MOCV_HEADERS_LIST
 
     src/util/convert/cv.h
     src/util/extend/cv/image.h
+
+    src/render/base.h
+    src/render/model/scene.h
+    src/render/primitive/point.h
+    src/render/model/rigid3d.h
 
     )
 

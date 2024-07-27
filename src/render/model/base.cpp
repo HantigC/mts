@@ -1,4 +1,4 @@
 #include "render/model/base.h"
 
 
-mts::BaseModel::BaseModel(){};
+mts::render::BaseModel::BaseModel(){};

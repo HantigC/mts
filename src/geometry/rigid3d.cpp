@@ -1,4 +1,5 @@
 #include "geometry/rigid3d.h"
+#include <Eigen/Dense>
 namespace mts {
 
 Eigen::Matrix4f Rigid3D::viewFromRt(const Eigen::Matrix3f& R, const Eigen::Vector3f& t) {
@@ -9,4 +10,10 @@ Eigen::Matrix4f Rigid3D::viewFromRt(const Eigen::Matrix3f& R, const Eigen::Vecto
     return view;
 }
 
+Eigen::Vector3f Rigid3D::invT() {
+    Eigen::Matrix4f invView = view.inverse();
+    Eigen::Vector3f invT = invView.block<3, 1>(0, 3);
+    return invT;
 }
+
+}  // namespace mts

@@ -8,6 +8,7 @@
 #include "visualization/camera.h"
 
 namespace mts {
+namespace render {
 
 CameraModel::CameraModel() {
     this->position = Eigen::Vector3f(0.0f, 0.0f, 0.0f);
@@ -60,5 +61,7 @@ std::ostream& operator<<(std::ostream& os, const CameraModel& camera) {
        << ")";
     return os;
 }
+
+}  // namespace render
 
 }  // namespace mts

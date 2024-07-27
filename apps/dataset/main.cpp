@@ -1,9 +1,20 @@
-#include "data/inmemory_ds.h"
-#include "keypoint/sift.h"
+#include <memory>
+#include <vector>
 
+#include "data/dataset.h"
+#include "data/inmemory_ds.h"
+#include "keypoint/keypoint.h"
+#include "keypoint/sift.h"
+#include "match/bf.h"
+#include "match/match.h"
+#include "render/base.h"
+#include "render/model/base.h"
+#include "render/model/camera.h"
+#include "render/model/scene.h"
+#include "scene/scene.h"
+#include "sfm/sfm.h"
 
 int main(int argc, const char** argv) {
-
     std::vector<std::string> imagePaths = {
         "./resources/fountain/images/0000.png",
         "./resources/fountain/images/0001.png",
@@ -35,9 +46,21 @@ int main(int argc, const char** argv) {
     dataset.loadData();
     mts::SiftExtractor sift;
     auto keypoints = sift.computeKeypointDescriptor(dataset.images.back().image);
-    std::cout << "hmm";
-    std::cout << keypoints.descriptors;
+    mts::BFMatcher matcher;
+    mts::SfM sfm(std::make_shared<mts::InMemoryDataset>(dataset),
+                 std::make_shared<mts::SiftExtractor>(sift),
+                 std::make_shared<mts::BFMatcher>(matcher));
 
+    mts::Scene scene = sfm.reconstructTwoView(dataset.imageAt(0), dataset.imageAt(1));
+    mts::render::SceneModel sceneModel(scene);
+    std::shared_ptr<mts::render::SceneModel> sceneModel_p =
+        std::make_shared<mts::render::SceneModel>(sceneModel);
+    std::vector<std::shared_ptr<mts::render::BaseModel>> models = {sceneModel_p};
+    Eigen::Vector3f origin(0.0f, 0.0f, 0.0f);
+    Eigen::Vector3f forward(0.0f, 0.0f, 1.0f);
+    origin = origin - 1.0f * forward;
     
+    draw(models, origin, forward);
+
     return 0;
 }

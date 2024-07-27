@@ -3,6 +3,8 @@
 #include <pangolin/pangolin.h>
 
 namespace mts {
+namespace render {
+
 Pcl::Pcl(const std::vector<Eigen::Vector3f>& points)
     : points(points), colors({Eigen::Vector3f(1.0f, 0.0f, 0.0f)}){};
 
@@ -41,4 +43,6 @@ void Pcl::draw_points(std::vector<Eigen::Vector3f>& points,
     }
     glEnd();
 }
+
+}  // namespace render
 }  // namespace mts

@@ -6,6 +6,8 @@
 #include "render/model/base.h"
 
 namespace mts {
+namespace render {
+
 class CameraModel : public BaseModel {
    public:
     CameraModel();
@@ -30,6 +32,8 @@ class CameraModel : public BaseModel {
 
     friend std::ostream& operator<<(std::ostream& os, const CameraModel& camera);
 };
+
+}  // namespace render
 }  // namespace mts
 
 #endif  // !RENDER_MODEL_CAMERA_H

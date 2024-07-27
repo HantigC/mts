@@ -1,13 +1,19 @@
 #include "sfm/sfm.h"
+
 #include <opencv2/core.hpp>
+#include <vector>
 
 #include "geometry/essential.h"
 #include "geometry/fundamental.h"
+#include "geometry/pose.h"
+#include "geometry/rigid3d.h"
 #include "keypoint/keypoint.h"
 #include "match/match.h"
+#include "model/image.h"
+#include "scene/scene.h"
 
 namespace mts {
-void SfM::reconstruct(mts::Image stImage, mts::Image ndImage) {
+mts::Scene SfM::reconstructTwoView(mts::Image stImage, mts::Image ndImage) {
     auto stKeypointDescriptor =
         keypointExtractor->computeKeypointDescriptor(stImage.image);
     auto ndKeypointDescriptor =
@@ -17,16 +23,29 @@ void SfM::reconstruct(mts::Image stImage, mts::Image ndImage) {
     matcher->match(
         stKeypointDescriptor.descriptors, ndKeypointDescriptor.descriptors, matches);
 
-    Eigen::MatrixX2f stKeypoints =
-        stKeypointDescriptor.keypoints(matches(Eigen::all, 0), Eigen::all);
-    Eigen::MatrixX2f ndKeypoints =
-        ndKeypointDescriptor.keypoints(matches(Eigen::all, 1), Eigen::all);
+    matches(0);
+    Eigen::Array<unsigned int, Eigen::Dynamic, 1> stMathces = matches.col(0).array();
+    Eigen::Array<unsigned int, Eigen::Dynamic, 1> ndMathces = matches.col(1).array();
+    stMathces(0);
+    ndMathces(0);
 
-    auto F = mts::computeFundamentalMatrix(stKeypoints, ndKeypoints);
+    Eigen::MatrixX2f stKeypoints = stKeypointDescriptor.keypoints(stMathces, Eigen::all);
+    Eigen::MatrixX2f ndKeypoints = ndKeypointDescriptor.keypoints(ndMathces, Eigen::all);
+    Eigen::VectorXi mask;
+
+    auto F = mts::computeFundamentalMatrix(stKeypoints, ndKeypoints, mask);
+    mask(0);
 
     auto E = mts::computeEssentialMatrix(stImage.camera->K, F, ndImage.camera->K);
-    Eigen::Matrix3f R1, R2;
+    Eigen::Matrix3f R;
     Eigen::Vector3f t;
-    mts::decomposeEssentialRt(E, R1, R2, t);
+    std::vector<Eigen::Vector3f> points3D;
+
+    mts::poseFromEssential<2>(E, stKeypoints, ndKeypoints, &R, &t, &points3D);
+    std::vector<mts::Image> images{stImage, ndImage};
+    std::vector<mts::Rigid3D> poses{mts::Rigid3D(), mts::Rigid3D(R, t)};
+
+    mts::Scene scene(images, points3D, poses);
+    return scene;
 }
 }  // namespace mts
