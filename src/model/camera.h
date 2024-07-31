@@ -19,6 +19,12 @@ class Camera {
         focalLength = K(0, 0);
     };
 
+    static std::vector<Eigen::Vector3f> fromImageToCamera(
+        const Eigen::Matrix3f& K, std::vector<Eigen::Vector2f>& pts);
+
+    static Eigen::MatrixX3f fromImageToCamera(
+        const Eigen::Matrix3f& K, Eigen::MatrixX2f& pts);
+
     Eigen::Matrix3f K;
     float focalLength;
     float cx;

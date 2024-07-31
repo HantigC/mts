@@ -9,6 +9,7 @@
 #include "geometry/rigid3d.h"
 #include "keypoint/keypoint.h"
 #include "match/match.h"
+#include "model/camera.h"
 #include "model/image.h"
 #include "scene/scene.h"
 
@@ -41,7 +42,12 @@ mts::Scene SfM::reconstructTwoView(mts::Image stImage, mts::Image ndImage) {
     Eigen::Vector3f t;
     std::vector<Eigen::Vector3f> points3D;
 
-    mts::poseFromEssential<2>(E, stKeypoints, ndKeypoints, &R, &t, &points3D);
+    auto stCameraKeypoints =
+        mts::Camera::fromImageToCamera(stImage.camera->K, stKeypoints);
+    auto ndCameraKeypoints =
+        mts::Camera::fromImageToCamera(ndImage.camera->K, ndKeypoints);
+
+    mts::poseFromEssential<3>(E, stCameraKeypoints, ndCameraKeypoints, &R, &t, &points3D);
     std::vector<mts::Image> images{stImage, ndImage};
     std::vector<mts::Rigid3D> poses{mts::Rigid3D(), mts::Rigid3D(R, t)};
 

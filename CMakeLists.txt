@@ -35,7 +35,7 @@ set(MOCV_SRCS_LIST
     src/render/model/pcl.cpp
 
     # src/model/image.cpp
-    # src/model/camera.cpp
+    src/model/camera.cpp
 
     src/epipolar/draw.cpp
     src/keypoint/draw.cpp

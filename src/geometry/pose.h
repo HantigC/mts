@@ -40,15 +40,15 @@ bool checkCheirality(const Eigen::Matrix4f& stView,
 template <unsigned int T>
 bool checkCheirality(const Eigen::Matrix3f& R,
                      const Eigen::Vector3f& t,
-                     const Eigen::MatrixX2f& stPoints,
-                     const Eigen::MatrixX2f& ndPoints,
+                     const Eigen::Matrix<float, Eigen::Dynamic, T>& stPoints,
+                     const Eigen::Matrix<float, Eigen::Dynamic, T>& ndPoints,
                      std::vector<Eigen::Vector3f>& points3D) {
     Eigen::Vector3f point3D;
     Eigen::Matrix4f eye = Eigen::Matrix4f::Identity();
     auto view = mts::Rigid3D::viewFromRt(R, t);
     float stDepth, ndDepth;
     for (size_t rowIdx = 0; rowIdx < stPoints.rows(); ++rowIdx) {
-        point3D = mts::triangulateLinearTwoView<2>(
+        point3D = mts::triangulateLinearTwoView<T>(
             stPoints.row(rowIdx), ndPoints.row(rowIdx), eye, view);
         stDepth = computeDepth(eye, point3D);
         if (stDepth < 0.0f) {
@@ -62,7 +62,6 @@ bool checkCheirality(const Eigen::Matrix3f& R,
     }
     return !points3D.empty();
 }
-
 
 template <unsigned int T>
 bool checkCheirality(const Eigen::Matrix4f& stView,
