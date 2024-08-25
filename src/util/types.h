@@ -1,7 +1,9 @@
 #ifndef UTIL_TYPES_H
 #define UTIL_TYPES_H
+#include <cstdint>
 namespace mts {
-    typedef unsigned int image_t;
+    typedef uint32_t image_t;
+    typedef uint64_t image_pair_t;
 
 }
 
